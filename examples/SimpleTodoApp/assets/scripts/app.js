@@ -78,31 +78,31 @@ function updateTodoListUI()
   todos.forEach(todo =>
   {
     console.log(`Key: ${todo.Id}  value ${todo.Caption}`);
-    const card = document.createElement("div");
-    card.id = todo.Id;
-    card.className = "todoList-item card w-100";
+    const item = document.createElement("li");
+    item.id = todo.Id;
+    item.className = "todoList-item list-group-item w-100 ";
+    item.draggable = true;
+    item.ondragstart = (ev) => drag(ev);
+    item.ondragover = (ev) => allowDrop(ev);
+    item.ondrop = (ev) => drop(ev);
 
-    const cardBody = card.appendChild(document.createElement("div"));
-    cardBody.className = "card-body";
+    const itemBody = item.appendChild(document.createElement("div"));
+    itemBody.className = "item-body";
 
-    const cardContent = cardBody.appendChild(document.createElement("h5"));
-    cardContent.className = "card-title text-start";
-    cardContent.innerHTML = todo.Caption;
+    const itemContent = itemBody.appendChild(document.createElement("h5"));
+    itemContent.className = "item-title text-start";
+    itemContent.innerHTML = todo.Caption;
 
-    const cardActionsRow = cardBody.appendChild(document.createElement("div"));
-    cardActionsRow.className = "d-flex flex-row-reverse";
-    const cardActionsBody = cardActionsRow.appendChild(document.createElement("div"));
-
-    const buttonRemove = cardActionsBody.appendChild(document.createElement("button"));
+    const itemActions = itemBody.appendChild(document.createElement("div"));
+    itemActions.className = "d-flex flex-row-reverse";
+  
+    const buttonRemove = itemActions.appendChild(document.createElement("button"));
     buttonRemove.className = "btn btn-primary m-1";
     buttonRemove.innerText = "remove";
 
-    buttonRemove.onclick = function ()
-    {
-      removeTodoById(todo.Id);
-    }
+    buttonRemove.onclick = () => removeTodoById(todo.Id);
  
-    container.appendChild(card);
+    container.appendChild(item);
   })
 
   writeLocaleStorage()
@@ -129,6 +129,87 @@ function readLocaleStorage()
     console.log(`Failed to read stored data (${err})`);
     return new Array();
   }
+}
+
+function drag(ev){
+  ev.dataTransfer.setData("text", ev.target.id);
+  console.log (`Dragging element with id "${ev.target.id}"`);
+}
+
+function allowDrop(ev) {
+  ev.preventDefault();
+  // var data = ev.dataTransfer.getData("text");
+  // console.log(`Allow drop data ${data} on element ${ev.target.id}`);
+}
+
+
+// function drop(ev){
+
+//   ev.preventDefault();
+//   let idSource = ev.dataTransfer.getData("text");
+//   let idTarget = ev.currentTarget.id;
+
+//   console.log(`Dropped element with id ${idSource} on element with id ${idTarget}`);
+//   if (idSource === idTarget) return;
+
+//   let ixSource = todos.findIndex( (t) => t.Id === idSource);
+//   let ixTarget = todos.findIndex( (t) => t.Id === idTarget);
+
+//   console.log(`Index of Source: ${ixSource}`);
+//   let todo = todos[ixSource];
+//   console.log(`Content of Source: ${todo.toString()}`);
+
+//   todos.splice(ixSource, 1);
+//   console.log(`Removing Todo : ${todos.toString()}`);
+
+//   console.log(`Index of Target: ${ixTarget}`);
+
+//   const newTodos = [
+//     ...todos.slice(0, ixTarget),
+//     todo,
+//     ...todos.slice(ixTarget)
+//   ];
+//   todos = newTodos;
+
+//   updateTodoListUI();
+// }
+
+function drop(ev){
+
+  ev.preventDefault();
+  const idSource = ev.dataTransfer.getData("text");
+  const idTarget = ev.currentTarget.id;
+
+  console.log(`Dropped element with id ${idSource} on element with id ${idTarget}`);
+  if (idSource === idTarget) return;
+
+  const ixSource = todos.findIndex( (t) => t.Id === idSource);
+  const ixTarget = todos.findIndex( (t) => t.Id === idTarget);
+
+  console.log(`Index of Source: ${ixSource}`);
+  const todo = todos[ixSource];
+  console.log(`Content of Source: ${JSON.stringify(todo)}`);
+
+  todos.splice(ixSource, 1);
+  console.log(`Removing dragged todo : ${JSON.stringify(todo)}`);
+  console.log(`Index of target: ${ixTarget}`);
+
+  // Note: 
+  // The ixTarget can lie outside the range of the array.
+  // The array.splice method implicitly limits it to the array boundaries. 
+
+  // InsertAt() using the 
+  //   const newTodos = [
+  //     ...todos.slice(0, ixTarget),
+  //     todo,
+  //     ...todos.slice(ixTarget)
+  //   ];
+  //   todos = newTodos;
+
+  // InsertAt() using array.splice() 
+  todos.splice(ixTarget, 0, todo);
+
+  updateTodoListUI();
 }
 
 // Write todo list to local storage
