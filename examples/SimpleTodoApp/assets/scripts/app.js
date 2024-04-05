@@ -61,12 +61,46 @@ function removeTodoById(id)
   writeLocaleStorage()
 }
 
+// todo todo item by Id
+function toggleTodoById(id)
+{
+  let ix = todos.findIndex( t => t.Id == id)
+  if (ix === -1) return;
+  let todo = todos[ix];
+  todo.Done = !todo.Done;
+
+  console.log(`Toggle todo "${id}"`);
+ 
+  // const todoEl = document.querySelector(`#${id} .item-title`);
+  // console.log(todoEl);
+  // todoEl.style.textDecoration = todo.Done? "line-through" : "none";
+
+  updateUI();
+  writeLocaleStorage();
+}
+
+
 // Update UI with todo statistics
 function updateTodoStatsUI()
 {
   const todo_counter = document.getElementById("todolist-counter");
   todo_counter.textContent = "";
   todo_counter.textContent = (todos.length > 0) ? `${todos.length} Todo(s)` : "No entries" ;
+}
+
+function editTodoById(id)
+{
+  let ix = todos.findIndex( t => t.Id == id)
+  if (ix === -1) return;
+  let todo = todos[ix];
+
+  const newText = prompt("Edit the Todo Item", todo.Caption);
+
+  if (newText !== null && newText !== "") {
+    todo.Caption =  newText;
+    updateTodoListUI();
+    writeLocaleStorage();
+  }
 }
 
 // Update UI with todo list
@@ -91,13 +125,24 @@ function updateTodoListUI()
 
     const itemContent = itemBody.appendChild(document.createElement("h5"));
     itemContent.className = "item-title text-start";
-    itemContent.innerHTML = todo.Caption;
+    itemContent.textContent = todo.Caption;
+    itemContent.style.textDecoration = todo.Done? "line-through" : "none";
 
     const itemActions = itemBody.appendChild(document.createElement("div"));
-    itemActions.className = "d-flex flex-row-reverse";
+    itemActions.className = "d-flex justify-content-end";
   
+    const buttonDone = itemActions.appendChild(document.createElement("button"));
+    buttonDone.className = "btn m-1 btn-primary";
+    buttonDone.innerText = "done";
+    buttonDone.onclick = () => toggleTodoById(todo.Id);
+
+    const buttonEdit = itemActions.appendChild(document.createElement("button"));
+    buttonEdit.className = "btn m-1 btn-primary";
+    buttonEdit.innerText = "edit";
+    buttonEdit.onclick = () => editTodoById(todo.Id);
+
     const buttonRemove = itemActions.appendChild(document.createElement("button"));
-    buttonRemove.className = "btn btn-primary m-1";
+    buttonRemove.className = "btn m-1 btn-danger";
     buttonRemove.innerText = "remove";
 
     buttonRemove.onclick = () => removeTodoById(todo.Id);
@@ -138,41 +183,8 @@ function drag(ev){
 
 function allowDrop(ev) {
   ev.preventDefault();
-  // var data = ev.dataTransfer.getData("text");
-  // console.log(`Allow drop data ${data} on element ${ev.target.id}`);
 }
 
-
-// function drop(ev){
-
-//   ev.preventDefault();
-//   let idSource = ev.dataTransfer.getData("text");
-//   let idTarget = ev.currentTarget.id;
-
-//   console.log(`Dropped element with id ${idSource} on element with id ${idTarget}`);
-//   if (idSource === idTarget) return;
-
-//   let ixSource = todos.findIndex( (t) => t.Id === idSource);
-//   let ixTarget = todos.findIndex( (t) => t.Id === idTarget);
-
-//   console.log(`Index of Source: ${ixSource}`);
-//   let todo = todos[ixSource];
-//   console.log(`Content of Source: ${todo.toString()}`);
-
-//   todos.splice(ixSource, 1);
-//   console.log(`Removing Todo : ${todos.toString()}`);
-
-//   console.log(`Index of Target: ${ixTarget}`);
-
-//   const newTodos = [
-//     ...todos.slice(0, ixTarget),
-//     todo,
-//     ...todos.slice(ixTarget)
-//   ];
-//   todos = newTodos;
-
-//   updateTodoListUI();
-// }
 
 function drop(ev){
 

@@ -19,6 +19,8 @@ This means that the list does not always have to be rendered completely
 - 2024-04-02: 
   - Using *list-group* for todo items
   - Added *drag-and-drop*
+- 2024-04-03:
+  - Added buttons to edit todo and mark it completed
 
 
 ## Comments
